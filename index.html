@@ -14,6 +14,43 @@
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
   <body>
+    <h1 class="text-white text-center fs-3 fw-bold m-2">
+      Conversor de Monedas Nacional
+    </h1>
+    <hr class="hr-title-personalized" />
+    <section class="card container card-personalized text-white">
+      <div class="card-body card-body-personalized d-grid">
+        <label
+          for="input-clp"
+          class="form-label fw-bold"
+          style="font-size: 22px"
+        >
+          Pesos CLP
+        </label>
+        <input
+          id="input-clp"
+          type="text"
+          class="form-control mb-3"
+          placeholder="Ingrese el monto en CLP"
+        />
+        <label for="select-money" class="form-label" style="font-size: 15px"
+          >Moneda a convertir:</label
+        >
+        <select class="form-select mb-3" id="select-money">
+          <option selected>Seleccione moneda</option>
+        </select>
+        <button
+          class="btn btn-primary btn-personalized fw-bold"
+          type="button"
+          id="button-search"
+        >
+          Buscar
+        </button>
+        <p class="m-2">
+          <span id="currency-exchange"></span>
+        </p>
+      </div>
+    </section>
     <script src="assets/js/script.js"></script>
     <script
       src="https://kit.fontawesome.com/f5bdbb41e0.js"

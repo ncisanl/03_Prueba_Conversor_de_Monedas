@@ -6,4 +6,30 @@
 
 body {
   font-family: sans-serif;
+  background-color: black;
+}
+
+.hr-title-personalized {
+  color: #253a42;
+  opacity: 100%;
+  width: 60%;
+  margin: 0 auto;
+  margin-bottom: 16px;
+}
+
+.card-personalized {
+  background-color: #6e757c;
+  text-align-last: center;
+  width: 300px;
+}
+
+.card-body-personalized {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.btn-personalized {
+  background-color: #5dc7ec;
+  color: white;
+  border: none;
 }
