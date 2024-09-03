@@ -1,51 +1,115 @@
-const apiURL = "https://mindicador.cl/api/";
+const apiURLExchangeRates = "https://mindicador.cl/api/";
 
 const selectMoney = document.querySelector("#select-money");
 const buttonSearch = document.querySelector("#button-search");
 
-async function getExchangeRates() {
-  const response = await fetch(apiURL);
-  return await response.json();
-}
+const exchanges = [
+  {
+    idExchange: "dolar",
+    nameExchange: "Dólar observado",
+  },
+  {
+    idExchange: "dolar_intercambio",
+    nameExchange: "Dólar acuerdo",
+  },
+  { idExchange: "euro", nameExchange: "Euro" },
+  {
+    idExchange: "ivp",
+    nameExchange: "Indice de valor promedio (IVP)",
+  },
+  {
+    idExchange: "uf",
+    nameExchange: "Unidad de fomento (UF)",
+  },
+  {
+    idExchange: "utm",
+    nameExchange: "Unidad Tributaria Mensual (UTM)",
+  },
+];
 
-async function renderSelectExchangeRates() {
-  try {
-    const exchangeRates = await getExchangeRates();
-    selectMoney.innerHTML = `
-<option value="" selected>Seleccione moneda</option>
-<option value="${exchangeRates?.bitcoin?.valor}">${exchangeRates?.bitcoin?.nombre}</option>
-<option value="${exchangeRates?.dolar?.valor}">${exchangeRates?.dolar?.nombre}</option>
-<option value="${exchangeRates?.dolar_intercambio?.valor}">${exchangeRates?.dolar_intercambio?.nombre}</option>
-<option value="${exchangeRates?.euro?.valor}">${exchangeRates?.euro?.nombre}</option>
-<option value="${exchangeRates?.imacec?.valor}">${exchangeRates?.imacec?.nombre}</option>
-<option value="${exchangeRates?.ipc?.valor}">${exchangeRates?.ipc?.nombre}</option>
-<option value="${exchangeRates?.ivp?.valor}">${exchangeRates?.ivp?.nombre}</option>
-<option value="${exchangeRates?.libra_cobre?.valor}">${exchangeRates?.libra_cobre?.nombre}</option>
-<option value="${exchangeRates?.tasa_desempleo?.valor}">${exchangeRates?.tasa_desempleo?.nombre}</option>
-<option value="${exchangeRates?.tpm?.valor}">${exchangeRates?.tpm?.nombre}</option>
-<option value="${exchangeRates?.uf?.valor}">${exchangeRates?.uf?.nombre}</option>
-<option value="${exchangeRates?.utm?.valor}">${exchangeRates?.utm?.nombre}</option>
-`;
-  } catch (error) {
-    alert(error.message);
+renderExchangeRates();
+
+function renderExchangeRates() {
+  let html = `<option value="" selected>Seleccione moneda</option>`;
+  for (exchange of exchanges) {
+    html += `<option value="${exchange.idExchange}">${exchange?.nameExchange}</option>`;
   }
+  selectMoney.innerHTML = html;
 }
 
-renderSelectExchangeRates();
-
-buttonSearch.addEventListener("click", function () {
+buttonSearch.addEventListener("click", async function () {
   let inputCLP = document.querySelector("#input-clp");
+  const myChart = document.getElementById("myChart");
   let contentInputCLP = Number(inputCLP.value);
-  let currencyExchange = document.querySelector("#currency-exchange");
+
   if (contentInputCLP === 0) {
-    currencyExchange.innerHTML = "Ingrese pesos CLP";
+    currencyExchangeResponse("Ingrese pesos CLP");
+    myChart.style.background = "";
+    clearChart();
     return;
   }
-  if (selectMoney.value === "") {
-    currencyExchange.innerHTML = "Seleccione moneda a convertir";
-    return;
+
+  if (selectMoney.value !== "") {
+    const responseGetExchangeRates = await getExchangeRates(selectMoney.value);
+    const valueExchangeRates = responseGetExchangeRates.serie[0].valor;
+    const calculateExchangeRates = (
+      contentInputCLP / valueExchangeRates
+    ).toFixed(2);
+    renderGraphic(responseGetExchangeRates.serie.slice(0, 10));
+    currencyExchangeResponse("Resultado: $".concat(calculateExchangeRates));
+  } else {
+    currencyExchangeResponse("Seleccione moneda a convertir");
+    myChart.style.background = "";
+    clearChart();
   }
-  currencyExchange.innerHTML = "Resultado: $".concat(
-    contentInputCLP + Number(selectMoney.value),
-  );
 });
+
+function currencyExchangeResponse(responseAddEventListener) {
+  let currencyExchange = document.querySelector("#currency-exchange");
+  currencyExchange.innerHTML = responseAddEventListener;
+}
+
+async function getExchangeRates(typeExchange) {
+  try {
+    const response = await fetch(apiURLExchangeRates.concat(typeExchange));
+    return await response.json();
+  } catch (error) {
+    alert("Error al intentar convertir moneda seleccionada");
+  }
+}
+
+function renderGraphic(responseGetExchangeRates) {
+  const data = getAndCreateDataToChart(responseGetExchangeRates);
+  const config = {
+    type: "line",
+    data,
+  };
+  const myChart = document.getElementById("myChart");
+  myChart.style.backgroundColor = "white";
+  clearChart();
+  window.chart = new Chart(myChart, config);
+}
+
+function getAndCreateDataToChart(responseGetExchangeRates) {
+  const labels = responseGetExchangeRates.map((exchange) => {
+    return exchange.fecha.split("T")[0];
+  });
+  const data = responseGetExchangeRates.map((exchange) => {
+    return exchange.valor;
+  });
+  const datasets = [
+    {
+      label: "Historial últimos 10 días",
+      borderColor: "rgb(255, 99, 132)",
+      data,
+    },
+  ];
+  return { labels, datasets };
+}
+
+function clearChart() {
+  if (window.chart) {
+    window.chart.clear();
+    window.chart.destroy();
+  }
+}

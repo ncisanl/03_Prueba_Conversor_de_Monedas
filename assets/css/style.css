@@ -20,7 +20,7 @@ body {
 .card-personalized {
   background-color: #6e757c;
   text-align-last: center;
-  width: 300px;
+  max-width: 350px;
 }
 
 .card-body-personalized {
